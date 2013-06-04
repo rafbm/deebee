@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Deebee</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box }
+
+    body, input, textarea, button {
+      font: 16px Lucida Grande;
+    }
+
+    body {
+      padding: 1em;
+    }
+
+    ul { list-style: none }
+    li { margin: 1em 0 }
+
+    nav {
+      margin-bottom: 1em;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+    table, table input, table textarea, table button {
+      font-size: 11px;
+    }
+
+    td, th {
+      border: 1px solid lightgrey;
+      padding: 0;
+    }
+    th {
+      padding: .2em .4em;
+    }
+
+    td input,
+    td textarea {
+      padding: .4em .5em;
+      margin: 0;
+      border: 0;
+      resize: none;
+      height: 2em;
+    }
+    td textarea:focus {
+      position: absolute;
+      z-index: 10;
+      width: 800px !important;
+      height: 600px !important;
+      max-width: none !important;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <select onchange="location.href = '/tables/' + this.value">
+      <option value="">Choose a table…</option>
+      <% $tables.each do |table| %>
+        <option <%= 'selected' if params[:table] == table.to_s %>><%= table %></option>
+      <% end %>
+    </select>
+  </nav>
+  <%= yield %>
+</body>
+</html>
