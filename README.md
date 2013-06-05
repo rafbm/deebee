@@ -1,18 +1,50 @@
-Deebee
-======
+# Deebee — Web client for your DB
 
-> Web client for your DB
+Deebee is a convenient and fast web interface for your DB. As a Sinatra app, it can be used standalone or mounted within your Rails app.
 
-## Setup
+## Rails setup
 
-Clone this repo, then set the `DATABASE_URL` environment variable in your [`.rbenv-vars`](https://github.com/sstephenson/rbenv-vars) or wherever you see fit.
+Just like Rails itself, Deebee first tries to connect to the `DATABASE_URL` environment variable, then fallbacks to `database.yml`.
 
-    bundle install
-    shotgun start
+```ruby
+# Gemfile
+gem 'deebee'
+```
 
-If you don’t use Postgres, change `gem 'pg'` to something else in the `Gemfile`.
+```ruby
+# config/routes.rb
+mount Deebee::App => '/deebee'
+```
 
-You mostly want this protected, so just set the `HTTP_USERNAME` and `HTTP_PASSWORD` environment variables too.
+### Authentication
+
+The preferred way of securing Deebee is through HTTP basic auth:
+
+```ruby
+# config/initializers/deebee.rb
+unless Rails.env.development?
+  Deebee::App.use Rack::Auth::Basic do |username, password|
+    username == 'username' && password == 'password'
+  end
+end
+```
+
+[ActiveAdmin](http://activeadmin.info) users can also take advantage of existing `admin_users`:
+
+```ruby
+# config/initializers/deebee.rb
+unless Rails.env.development?
+  Deebee::App.use Rack::Auth::Basic do |email, password|
+    if user = AdminUser.where(email: email).first
+      BCrypt::Password.new(user.encrypted_password) == password
+    end
+  end
+end
+```
+
+## Standalone usage
+
+For standalone use (dead-simple deployment on [Heroku](http://www.heroku.com)), see <http://github.com/rafBM/deebee/tree/master/examples/standalone>
 
 ## TODO
 
@@ -22,4 +54,4 @@ You mostly want this protected, so just set the `HTTP_USERNAME` and `HTTP_PASSWO
 
 ---
 
-© 2013 [Rafaël Blais Masson](http://rafbm.com)
+© 2013 [Rafaël Blais Masson](http://rafbm.com). Deebee is released under the MIT license.
