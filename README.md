@@ -17,6 +17,8 @@ You mostly want this protected, so just set the `HTTP_USERNAME` and `HTTP_PASSWO
 ## TODO
 
 - `UPDATE` + `INSERT` functionality
+- Sorting
+- Filtering
 
 ---
 
