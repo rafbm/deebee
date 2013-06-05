@@ -3,7 +3,7 @@ Bundler.require
 
 # Database connection
 $db = Sequel.connect(ENV['DATABASE_URL'])
-$tables = $db.tables
+$tables = $db.tables.sort
 
 # Logging
 require 'logger'
