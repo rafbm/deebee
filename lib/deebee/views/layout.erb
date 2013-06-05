@@ -72,17 +72,8 @@
     </select>
 
     <% if params[:table] %>
-      <% if params[:page] && params[:page].to_i > 1 %>
-        <a href="<%= url "/tables/#{params[:table]}/page/#{params[:page].to_i - 1}" %>">« Prev</a>
-      <% else %>
-        <a>« Prev</a>
-      <% end %>
-
-      <% if @records.size >= 500 %>
-        <a href="<%= url "/tables/#{params[:table]}/page/#{(params[:page] || 1).to_i + 1}" %>">Next »</a>
-      <% else %>
-        <a>Next »</a>
-      <% end %>
+      <%= prev_records_link %>
+      <%= next_records_link %>
     <% end %>
   </nav>
   <%= yield %>

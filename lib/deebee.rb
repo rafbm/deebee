@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'deebee/version'
 
 require 'sinatra/base'
@@ -13,6 +14,35 @@ module Deebee
 
   class App < Sinatra::Base
     set :root, File.expand_path('../deebee', __FILE__)
+
+    helpers do
+      def next_records_link
+        return link_to('Next »') unless @records.size >= @limit
+
+        page_url = records_page_url(1)
+        link_to 'Next »', page_url, true
+      end
+
+      def prev_records_link
+        return link_to('« Prev') unless @page > 1
+
+        page_url = records_page_url(-1)
+        link_to '« Prev', page_url, true
+      end
+
+      def records_page_url(increment)
+        "/tables/#{params[:table]}/page/#{@page + increment}"
+      end
+
+      def link_to(label, _url=nil, with_query_string=false)
+        if _url
+          _url << "?#{request.query_string}" if with_query_string && !request.query_string.empty?
+          %(<a href="#{url(_url)}">#{label}</a>).html_safe
+        else
+          %(<a>#{label}</a>).html_safe
+        end
+      end
+    end
 
     before do
       @@db ||= nil
@@ -58,35 +88,31 @@ module Deebee
     end
 
     get '/tables/:table' do
-      table = params[:table].to_sym
-
-      @table   = @db[table]
-      @schema  = Hash[@db.schema(table)]
-
-      if @schema.has_key? :id
-        @records = @table.limit(500).order(:id).all
-      else
-        @records = @table.limit(500).all
-      end
-
+      set_table
       erb :table
     end
 
     get '/tables/:table/page/:page' do
+      set_table
+      erb :table
+    end
+
+  private
+    def set_table
       table = params[:table].to_sym
 
       @table   = @db[table]
       @schema  = Hash[@db.schema(table)]
 
-      offset = 500 * (params[:page].to_i) - 500
+      @page = (params[:page] || 1).to_i
+      @limit = (params[:limit] || 500).to_i
+      offset = @limit * @page - @limit
 
       if @schema.has_key? :id
-        @records = @table.limit(500, offset).order(:id).all
+        @records = @table.limit(@limit, offset).order(:id).all
       else
-        @records = @table.limit(500, offset).all
+        @records = @table.limit(@limit, offset).all
       end
-
-      erb :table
     end
   end
 end
