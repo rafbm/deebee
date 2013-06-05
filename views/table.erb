@@ -12,7 +12,7 @@
         <% record.each do |key, value| %>
           <% type = @schema[key][:db_type] %>
 
-          <% if type == 'text' %>
+          <% if type.match /text|hstore/ %>
             <td>
               <textarea style="max-width: 200px"><%= CGI.escapeHTML(value.to_s) %></textarea>
             </td>
