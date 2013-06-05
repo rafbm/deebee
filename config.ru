@@ -43,4 +43,21 @@ get '/tables/:table' do
   erb :table
 end
 
+get '/tables/:table/page/:page' do
+  table = params[:table].to_sym
+
+  @table   = $db[table]
+  @schema  = Hash[$db.schema(table)]
+
+  offset = 500 * (params[:page].to_i) - 500
+
+  if @schema.has_key? :id
+    @records = @table.limit(500, offset).order(:id).all
+  else
+    @records = @table.limit(500, offset).all
+  end
+
+  erb :table
+end
+
 run Sinatra::Application

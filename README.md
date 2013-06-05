@@ -16,7 +16,6 @@ You mostly want this protected, so just set the `HTTP_USERNAME` and `HTTP_PASSWO
 
 ## TODO
 
-- Pagination
 - `UPDATE` + `INSERT` functionality
 
 ---

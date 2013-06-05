@@ -10,14 +10,20 @@
     }
 
     body {
-      padding: 1em;
+      padding: 3.5em 1em 1em;
     }
 
     ul { list-style: none }
     li { margin: 1em 0 }
 
     nav {
-      margin-bottom: 1em;
+      padding: 1em;
+      background: #fff;
+      position: fixed;
+      top: 0; right: 0; left: 0;
+    }
+    nav select {
+      margin-right: 1em;
     }
 
     table {
@@ -60,6 +66,20 @@
         <option <%= 'selected' if params[:table] == table.to_s %>><%= table %></option>
       <% end %>
     </select>
+
+    <% if params[:table] %>
+      <% if params[:page] && params[:page].to_i > 1 %>
+        <a href="/tables/<%= params[:table] %>/page/<%= params[:page].to_i - 1 %>">« Prev</a>
+      <% else %>
+        <a>« Prev</a>
+      <% end %>
+
+      <% if @records.size >= 500 %>
+        <a href="/tables/<%= params[:table] %>/page/<%= (params[:page] || 1).to_i + 1 %>">Next »</a>
+      <% else %>
+        <a>Next »</a>
+      <% end %>
+    <% end %>
   </nav>
   <%= yield %>
 </body>
