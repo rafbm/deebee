@@ -1,6 +1,7 @@
-<table>
+<table data-table="<%= @table_name %>">
   <thead>
     <tr>
+      <td class="action"></td>
       <% @table.columns.each do |column| %>
         <th><%= column %></th>
       <% end %>
@@ -8,23 +9,20 @@
   </thead>
   <tbody>
     <% @records.each do |record| %>
-      <tr>
+      <tr data-id="<%= record[:id] %>">
+        <td class="action"><a href="javascript:sync(<%= record[:id] %>)">Sync</a></td>
         <% record.each do |key, value| %>
           <% type = @schema[key][:db_type] %>
 
-          <% if type.match /text|hstore/ %>
-            <td>
+          <td data-key="<%= key %>">
+            <% if type.match /text|hstore/ %>
               <textarea style="max-width: 200px"><%= CGI.escapeHTML(value.to_s) %></textarea>
-            </td>
-          <% elsif type.match /integer|numeric/ %>
-            <td>
+            <% elsif type.match /integer|numeric/ %>
               <input value="<%= CGI.escapeHTML(value.to_s) %>" style="max-width: 300px; text-align: right">
-            </td>
-          <% else %>
-            <td>
+            <% else %>
               <input value="<%= CGI.escapeHTML(value.to_s) %>" style="max-width: 300px">
-            </td>
-          <% end %>
+            <% end %>
+          </td>
         <% end %>
       </tr>
     <% end %>
