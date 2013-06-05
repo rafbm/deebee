@@ -7,32 +7,45 @@ require 'cgi'
 
 module Deebee
   class Error < StandardError; end
-
   class ConnectionError < Error
-    def initialize(url)
-      @url = url
-    end
-
-    def message
-      "Invalid DATABASE_URL value: #{ENV['DATABASE_URL'].inspect}"
-    end
+    def message; 'Invalid DATABASE_URL or database.yml'; end
   end
 
   class App < Sinatra::Base
     set :root, File.expand_path('../deebee', __FILE__)
 
-    configure do
-      begin
-        set :db, Sequel.connect(ENV['DATABASE_URL'])
-        set :tables, settings.db.tables.sort
-      rescue Sequel::Error
-        raise ConnectionError.new(ENV['DATABASE_URL'])
-      end
-    end
-
     before do
-      @db = settings.db
-      @tables = settings.tables
+      @@db ||= nil
+
+      unless @@db
+        begin
+          if ENV['DATABASE_URL']
+            @@db = Sequel.connect(ENV['DATABASE_URL'])
+          else
+            config = Rails.configuration.database_configuration[Rails.env]
+
+            # TODO Test other adapters
+            config['adapter'] = 'postgres' if config['adapter'] =~ /postgres/
+
+            @@db = Sequel.connect(
+              adapter: config['adapter'],
+              encoding: config['encoding'],
+              database: config['database'],
+              host: config['host'],
+              port: config['port'],
+              password: config['password'],
+              user: config['username'],
+              max_connections: config['pool'],
+            )
+          end
+          @@tables = @@db.tables.sort
+        rescue Sequel::Error, NameError
+          raise ConnectionError
+        end
+      end
+
+      @db = @@db
+      @tables = @@tables
       redirect request.path_info.sub(/\/$/, '') if request.path_info =~ /.+\/$/
     end
 
