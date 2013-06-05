@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'deebee'
+# Or this line, when developing Deebee and testing from this example app
+# gem 'deebee', path: '../..'
+
+gem 'puma' # or whatever server you prefer, also change Procfile
+gem 'pg'   # or whatever database you prefer

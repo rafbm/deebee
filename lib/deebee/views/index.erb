@@ -1,0 +1,8 @@
+<ul>
+  <% @tables.each do |table| %>
+    <li>
+      <a href="<%= url "/tables/#{table}" %>"><%= table %></a>
+      (<%= @db[table].count %>)
+    </li>
+  <% end %>
+</ul>

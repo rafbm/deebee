@@ -64,22 +64,22 @@
 </head>
 <body>
   <nav>
-    <select onchange="location.href = '/tables/' + this.value">
+    <select onchange="location.href = '<%= url '/tables/' %>' + this.value">
       <option value="">Choose a table…</option>
-      <% $tables.each do |table| %>
+      <% @tables.each do |table| %>
         <option <%= 'selected' if params[:table] == table.to_s %>><%= table %></option>
       <% end %>
     </select>
 
     <% if params[:table] %>
       <% if params[:page] && params[:page].to_i > 1 %>
-        <a href="/tables/<%= params[:table] %>/page/<%= params[:page].to_i - 1 %>">« Prev</a>
+        <a href="<%= url "/tables/#{params[:table]}/page/#{params[:page].to_i - 1}" %>">« Prev</a>
       <% else %>
         <a>« Prev</a>
       <% end %>
 
       <% if @records.size >= 500 %>
-        <a href="/tables/<%= params[:table] %>/page/<%= (params[:page] || 1).to_i + 1 %>">Next »</a>
+        <a href="<%= url "/tables/#{params[:table]}/page/#{(params[:page] || 1).to_i + 1}" %>">Next »</a>
       <% else %>
         <a>Next »</a>
       <% end %>
