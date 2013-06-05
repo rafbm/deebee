@@ -58,10 +58,10 @@ module Deebee
     end
 
     get '/tables/:table' do
-      table = params[:table].to_sym
+      @table_name = params[:table]
 
-      @table   = @db[table]
-      @schema  = Hash[@db.schema(table)]
+      @table   = @db[@table_name.to_sym]
+      @schema  = Hash[@db.schema(@table_name.to_sym)]
 
       if @schema.has_key? :id
         @records = @table.limit(500).order(:id).all
@@ -72,11 +72,23 @@ module Deebee
       erb :table
     end
 
-    get '/tables/:table/page/:page' do
-      table = params[:table].to_sym
+    post '/tables/:table/:id' do
+      record = @db.from(params[:table].to_sym)
+      fields = {}
 
-      @table   = @db[table]
-      @schema  = Hash[@db.schema(table)]
+      params[:record].each do |k, v|
+        fields[k.to_sym] = v
+      end
+
+      record.where("id = #{params[:id]}").update(fields)
+      200
+    end
+
+    get '/tables/:table/page/:page' do
+      @table_name = params[:table]
+
+      @table   = @db[@table_name.to_sym]
+      @schema  = Hash[@db.schema(@table_name.to_sym)]
 
       offset = 500 * (params[:page].to_i) - 500
 

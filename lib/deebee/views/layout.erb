@@ -13,6 +13,8 @@
       padding: 3.5em 1em 1em;
     }
 
+    a:hover, a:focus { text-decoration: none }
+
     ul { list-style: none }
     li { margin: 1em 0 }
 
@@ -40,6 +42,13 @@
     th {
       padding: .2em .4em;
     }
+
+    td.action { border: none }
+    td.action a {
+      padding-right: .6em;
+      display: none;
+    }
+    tr[data-dirty] td.action a { display: block }
 
     td input,
     td textarea {
@@ -83,8 +92,98 @@
       <% else %>
         <a>Next »</a>
       <% end %>
+
+      <a href="javascript:syncAll()">Sync all</a>
     <% end %>
   </nav>
   <%= yield %>
+  <script>
+    NodeList.prototype.forEach = Array.prototype.forEach;
+
+    var DATA_DIRTY = 'data-dirty',
+        tableName;
+
+    init = function() {
+      var inputs, table;
+
+      table = document.querySelectorAll('table');
+      if (table.length < 1) { return }
+
+      tableName = table[0].getAttribute('data-table');
+
+      inputs = document.querySelectorAll('input, textarea');
+      inputs.forEach(function(elem, i, array) {
+        elem.addEventListener('change', function(e) {
+          var element, cell, row;
+          element = e.currentTarget;
+
+          while (allParentsFound != true) {
+            var allParentsFound = false;
+
+            switch (element.nodeName) {
+              case 'TD':
+                cell = element;
+                break;
+              case 'TR':
+                row = element;
+                allParentsFound = true;
+                break;
+            }
+
+            element = element.parentNode;
+          }
+
+          cell.setAttribute(DATA_DIRTY, '');
+          row.setAttribute(DATA_DIRTY, '');
+        });
+      });
+    }
+
+    sync = function(id) {
+      var data, dirtyCells, row, rowSelector, url, xhr;
+
+      rowSelector = 'tr[data-id="' + id + '"]';
+      row = document.querySelectorAll(rowSelector)[0];
+      dirtyCells = document.querySelectorAll(rowSelector + ' td[' + DATA_DIRTY + ']');
+
+      if (!row || dirtyCells.length < 1 ) { return }
+
+      data = [];
+      dirtyCells.forEach(function(elem, i, array) {
+        var key, value;
+
+        key = elem.getAttribute('data-key');
+        value = elem.children[0].value;
+
+        data.push('record[' + key + ']' + '=' + value);
+      });
+
+      xhr = new XMLHttpRequest;
+      xhr.open('POST', '<%= url('/tables/') %>' + tableName + '/' + id);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onreadystatechange = function(e) {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          row.removeAttribute(DATA_DIRTY);
+          dirtyCells.forEach(function(elem, i, array) {
+            elem.removeAttribute(DATA_DIRTY);
+          });
+        }
+      }
+
+      xhr.send(data.join('&'));
+    }
+
+    syncAll = function() {
+      var rows = document.querySelectorAll('tr[' + DATA_DIRTY + ']');
+      if (rows.length < 1) { return }
+
+      rows.forEach(function(elem, i, array) {
+        var id = elem.getAttribute('data-id');
+        sync(id);
+      });
+    }
+
+    init();
+  </script>
 </body>
 </html>
